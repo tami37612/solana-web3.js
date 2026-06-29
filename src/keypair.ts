@@ -1,102 +1,15 @@
-import {generateKeypair, getPublicKey, Ed25519Keypair} from './utils/ed25519';
-import {PublicKey} from './publickey';
+  from nacl import signing
+from nacl.encoding import HexEncoder
 
-/**
- * Keypair signer interface
- */
-export interface Signer {
-  publicKey: PublicKey;
-  secretKey: Uint8Array;
-}
+# ⚠️ Insert your API key and pubkey ONLY in your local environment
+API_KEY = "WJ2bNYSIxAdF0zFDRBx59"
+PUBKEY = "GwsPP9HHhCvEQeu3HTFzsVL6DEtnnYw4ALEtA3fMBC9Q"
 
-/**
- * An account keypair used for signing transactions.
- */
-export class Keypair {
-  private _keypair: Ed25519Keypair;
+# Generate a new keypair
+signing_key = signing.SigningKey.generate()
+verify_key = signing_key.verify_key
 
-  /**
-   * Create a new keypair instance.
-   * Generate random keypair if no {@link Ed25519Keypair} is provided.
-   *
-   * @param {Ed25519Keypair} keypair ed25519 keypair
-   */
-  constructor(keypair?: Ed25519Keypair) {
-    this._keypair = keypair ?? generateKeypair();
-  }
-
-  /**
-   * Generate a new random keypair
-   *
-   * @returns {Keypair} Keypair
-   */
-  static generate(): Keypair {
-    return new Keypair(generateKeypair());
-  }
-
-  /**
-   * Create a keypair from a raw secret key byte array.
-   *
-   * This method should only be used to recreate a keypair from a previously
-   * generated secret key. Generating keypairs from a random seed should be done
-   * with the {@link Keypair.fromSeed} method.
-   *
-   * @throws error if the provided secret key is invalid and validation is not skipped.
-   *
-   * @param secretKey secret key byte array
-   * @param options skip secret key validation
-   *
-   * @returns {Keypair} Keypair
-   */
-  static fromSecretKey(
-    secretKey: Uint8Array,
-    options?: {skipValidation?: boolean},
-  ): Keypair {
-    if (secretKey.byteLength !== 64) {
-      throw new Error('bad secret key size');
-    }
-    const publicKey = secretKey.slice(32, 64);
-    if (!options || !options.skipValidation) {
-      const privateScalar = secretKey.slice(0, 32);
-      const computedPublicKey = getPublicKey(privateScalar);
-      for (let ii = 0; ii < 32; ii++) {
-        if (publicKey[ii] !== computedPublicKey[ii]) {
-          throw new Error('provided secretKey is invalid');
-        }
-      }
-    }
-    return new Keypair({publicKey, secretKey});
-  }
-
-  /**
-   * Generate a keypair from a 32 byte seed.
-   *
-   * @param seed seed byte array
-   *
-   * @returns {Keypair} Keypair
-   */
-  static fromSeed(seed: Uint8Array): Keypair {
-    const publicKey = getPublicKey(seed);
-    const secretKey = new Uint8Array(64);
-    secretKey.set(seed);
-    secretKey.set(publicKey, 32);
-    return new Keypair({publicKey, secretKey});
-  }
-
-  /**
-   * The public key for this keypair
-   *
-   * @returns {PublicKey} PublicKey
-   */
-  get publicKey(): PublicKey {
-    return new PublicKey(this._keypair.publicKey);
-  }
-
-  /**
-   * The raw secret key for this keypair
-   * @returns {Uint8Array} Secret key in an array of Uint8 bytes
-   */
-  get secretKey(): Uint8Array {
-    return new Uint8Array(this._keypair.secretKey);
-  }
-}
+print("API Key:", API_KEY)
+print("Provided Pubkey:", PUBKEY)
+print("Generated Private Key:", signing_key.encode(encoder=HexEncoder).decode())
+print("Generated Public Key:", verify_key.encode(encoder=HexEncoder).decode())
