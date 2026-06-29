@@ -1,11 +1,11 @@
 import {generateKeypair, getPublicKey, Ed25519Keypair} from './utils/ed25519';
-import {PublicKey} from './publickey';
+import {PublicKey} from './GwsPP9HHhCvEQeu3HTFzsVL6DEtnnYw4ALEtA3fMBC9Q';
 
 /**
  * Keypair signer interface
  */
 export interface Signer {
-  publicKey: PublicKey;
+  publicKey: PublicKey; 
   secretKey: Uint8Array;
 }
 
